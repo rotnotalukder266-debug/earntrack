@@ -340,12 +340,15 @@ function TasksTab({ uid, tasks, submissions, flash }) {
 
 function WalletTab({ uid, balance, withdrawals, flash }) {
   const [amt, setAmt] = useState("");
+  const [payoutNumber, setPayoutNumber] = useState("");
+  const [payoutMethod, setPayoutMethod] = useState("বিকাশ");
   const submit = async () => {
     const n = Number(amt);
     if (!n || n <= 0) return flash("সঠিক পরিমাণ দিন");
     if (n > balance) return flash("ব্যালেন্সে যথেষ্ট টাকা নেই");
-    await requestWithdraw(uid, n);
-    setAmt("");
+    if (!payoutNumber.trim()) return flash("যে নাম্বারে টাকা পাবেন সেটা দিন");
+    await requestWithdraw(uid, n, payoutNumber.trim(), payoutMethod);
+    setAmt(""); setPayoutNumber("");
     flash("উত্তোলনের অনুরোধ পাঠানো হয়েছে");
   };
   return (
@@ -355,14 +358,27 @@ function WalletTab({ uid, balance, withdrawals, flash }) {
         <div className="text-xs text-gray-500">বর্তমান ব্যালেন্স</div>
         <div className="text-3xl font-bold text-[#16233F] mb-4" style={display}>{money(balance)}</div>
         <Field label="উত্তোলনের পরিমাণ" value={amt} onChange={setAmt} placeholder="টাকার পরিমাণ লিখুন" />
+        <div className="mb-4">
+          <label className="text-xs text-gray-500">মাধ্যম</label>
+          <select value={payoutMethod} onChange={(e) => setPayoutMethod(e.target.value)}
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 mt-1 outline-none focus:border-[#16233F]">
+            <option>বিকাশ</option>
+            <option>নগদ</option>
+            <option>রকেট</option>
+          </select>
+        </div>
+        <Field label="আপনার নাম্বার (যেখানে টাকা পাবেন)" value={payoutNumber} onChange={setPayoutNumber} placeholder="01XXXXXXXXX" />
         <button onClick={submit} className="w-full bg-[#C9962C] text-[#16233F] rounded-xl py-3 font-semibold">উত্তোলনের অনুরোধ পাঠান</button>
       </Card>
       <h3 className="text-sm font-medium text-gray-500 mb-2">উত্তোলনের ইতিহাস</h3>
       <div className="space-y-2">
         {[...withdrawals].reverse().map((w) => (
-          <div key={w.id} className="bg-white rounded-xl border border-gray-200 p-3 flex items-center justify-between">
-            <span className="text-sm text-[#16233F]">{money(w.amount)}</span>
-            <Pill tone={w.status === "pending" ? "gold" : w.status === "approved" ? "green" : "coral"}>{w.status}</Pill>
+          <div key={w.id} className="bg-white rounded-xl border border-gray-200 p-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-[#16233F]">{money(w.amount)}</span>
+              <Pill tone={w.status === "pending" ? "gold" : w.status === "approved" ? "green" : "coral"}>{w.status}</Pill>
+            </div>
+            {w.payoutNumber && <div className="text-xs text-gray-400 mt-1">{w.payoutMethod} — {w.payoutNumber}</div>}
           </div>
         ))}
         {withdrawals.length === 0 && <p className="text-sm text-gray-400 text-center pt-4">কোনো ইতিহাস নেই</p>}
