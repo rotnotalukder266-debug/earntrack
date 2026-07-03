@@ -79,8 +79,8 @@ export const watchPendingWithdrawals = (cb) =>
   onSnapshot(query(collection(db, "withdrawals"), where("status", "==", "pending")), (snap) =>
     cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }))));
 
-export const requestWithdraw = (uid, amount) =>
-  addDoc(collection(db, "withdrawals"), { uid, amount, status: "pending", ts: new Date().toISOString() });
+export const requestWithdraw = (uid, amount, payoutNumber, payoutMethod) =>
+  addDoc(collection(db, "withdrawals"), { uid, amount, payoutNumber, payoutMethod, status: "pending", ts: new Date().toISOString() });
 
 export const decideWithdraw = async (withdrawalId, decision, amount, uid) => {
   await updateDoc(doc(db, "withdrawals", withdrawalId), { status: decision });
