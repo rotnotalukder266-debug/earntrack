@@ -15,7 +15,7 @@ import {
 const PAY_NUMBERS = [
   { name: "বিকাশ", number: "01725-837606" },
   { name: "নগদ", number: "01725-837606" },
-  { name: "রকেট", number: "01900-xxxxxx" },
+  { name: "রকেট", number: "01725_8376061" },
 ];
 
 const money = (n) => `৳${Number(n || 0).toLocaleString("bn-BD")}`;
